@@ -1,0 +1,163 @@
+# Saving the HTML and CSS code in a single file for simplicity.
+# This HTML and CSS code represents a simple shooting game
+# where a player controls a Llama Dragon, shooting fireballs at Rizzlers.
+
+game_code = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llama Dragons vs. Rizzlers</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #87ceeb;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        #gameCanvas {
+            background-color: #fffae3;
+            border: 2px solid #333;
+        }
+
+        #scoreboard {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: #222;
+        }
+    </style>
+</head>
+<body>
+    <div id="scoreboard">Score: 0</div>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let score = 0;
+        let rizzlers = [];
+        let fireballs = [];
+        let gameOver = false;
+
+        // Llama Dragon properties
+        const llamaDragon = {
+            x: 50,
+            y: canvas.height / 2,
+            width: 40,
+            height: 40,
+            color: "#8b4513",
+        };
+
+        // Rizzler properties
+        const rizzlerSpeed = 2;
+
+        // Fireball properties
+        const fireballSpeed = 5;
+
+        function drawLlamaDragon() {
+            ctx.fillStyle = llamaDragon.color;
+            ctx.fillRect(llamaDragon.x, llamaDragon.y, llamaDragon.width, llamaDragon.height);
+        }
+
+        function drawRizzlers() {
+            ctx.fillStyle = "purple";
+            rizzlers.forEach(rizzler => {
+                ctx.fillRect(rizzler.x, rizzler.y, rizzler.width, rizzler.height);
+            });
+        }
+
+        function drawFireballs() {
+            ctx.fillStyle = "orange";
+            fireballs.forEach(fireball => {
+                ctx.fillRect(fireball.x, fireball.y, fireball.width, fireball.height);
+            });
+        }
+
+        function spawnRizzler() {
+            const yPos = Math.random() * (canvas.height - 20);
+            rizzlers.push({ x: canvas.width, y: yPos, width: 30, height: 30 });
+        }
+
+        function updateGameObjects() {
+            // Move Rizzlers
+            rizzlers.forEach(rizzler => rizzler.x -= rizzlerSpeed);
+            rizzlers = rizzlers.filter(rizzler => rizzler.x > -rizzler.width);
+
+            // Move Fireballs
+            fireballs.forEach(fireball => fireball.x += fireballSpeed);
+            fireballs = fireballs.filter(fireball => fireball.x < canvas.width);
+
+            // Check collisions
+            fireballs.forEach((fireball, fIndex) => {
+                rizzlers.forEach((rizzler, rIndex) => {
+                    if (fireball.x < rizzler.x + rizzler.width &&
+                        fireball.x + fireball.width > rizzler.x &&
+                        fireball.y < rizzler.y + rizzler.height &&
+                        fireball.y + fireball.height > rizzler.y) {
+                        // Collision detected
+                        fireballs.splice(fIndex, 1);
+                        rizzlers.splice(rIndex, 1);
+                        score++;
+                        document.getElementById("scoreboard").innerText = "Score: " + score;
+                    }
+                });
+            });
+        }
+
+        function gameLoop() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawLlamaDragon();
+            drawRizzlers();
+            drawFireballs();
+            updateGameObjects();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Shoot fireballs
+        canvas.addEventListener("click", () => {
+            fireballs.push({
+                x: llamaDragon.x + llamaDragon.width,
+                y: llamaDragon.y + llamaDragon.height / 2 - 5,
+                width: 10,
+                height: 10
+            });
+        });
+
+        // Move Llama Dragon
+        document.addEventListener("mousemove", (event) => {
+            const canvasPosition = canvas.getBoundingClientRect();
+            const mouseY = event.clientY - canvasPosition.top;
+            if (mouseY > 0 && mouseY < canvas.height) {
+                llamaDragon.y = mouseY - llamaDragon.height / 2;
+            }
+        });
+
+        // Spawn Rizzlers periodically
+        setInterval(spawnRizzler, 1000);
+
+        gameLoop();
+    </script>
+</body>
+</html>
+"""
+
+# Write the HTML game file
+file_path = "/mnt/data/llama_dragons_vs_rizzlers.html"
+with open(file_path, "w") as file:
+    file.write(game_code)
+
+file_path
+
